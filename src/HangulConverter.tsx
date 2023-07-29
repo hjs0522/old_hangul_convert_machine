@@ -2,179 +2,138 @@ import React, { useState } from 'react';
 
 const HangulConverter: React.FC = () => {
     const [output, setOutput] = useState('');
-    const [lastWord,setLastWord] = useState('');
     const preventWord = ['Shift','CapsLock','Tab','Control','Alt','Meta','ArrowLeft',
     'ArrowRight','ArrowUp','ArrowDown','Escape','F1','F2','F3','F4',
     'F5','F6','F7','F8','F9','F10','F11','F12']
-    const handleKeyUp = (event:React.KeyboardEvent) => {
+    const handleKeyDown = (event:React.KeyboardEvent) => {
+        console.log(output.charAt(output.length-1))
+        const targetWord = output.charAt(output.length-1);
+        console.log(targetWord)
         if (event.key === '.'){
-            if(lastWord === 'ㅁ'){
+            if(targetWord === 'ㅁ'){
                 setOutput(output.slice(0,-1)+'ㅿ');
-                setLastWord('ㅿ');
             }
-            else if(lastWord === 'ㅇ'){
+            else if(targetWord === 'ㅇ'){
                 setOutput(output.slice(0,-1)+'ㆁ');
-                setLastWord('ㆁ');
             }
-            else if(lastWord === 'ㅎ'){
+            else if(targetWord === 'ㅎ'){
                 setOutput(output.slice(0,-1)+'ㆆ');
-                setLastWord('ㆆ');
             }
-            else if(lastWord === 'ㅋ'){
+            else if(targetWord === 'ㅋ'){
                 setOutput(output.slice(0,-1)+'ᄼ');
-                setLastWord('ᄼ');
             }
-            else if(lastWord === 'ᄼ'){
+            else if(targetWord === 'ᄼ'){
                 setOutput(output.slice(0,-1)+'ᄽ');
-                setLastWord('ᄽ');
             }
-            else if(lastWord === 'ㅌ'){
+            else if(targetWord === 'ㅌ'){
                 setOutput(output.slice(0,-1)+'ᄾ');
-                setLastWord('ᄾ');
             }
-            else if(lastWord === 'ᄾ'){
+            else if(targetWord === 'ᄾ'){
                 setOutput(output.slice(0,-1)+'ᄿ');
-                setLastWord('ᄿ');
             }
-            else if(lastWord === 'ㅊ'){
+            else if(targetWord === 'ㅊ'){
                 setOutput(output.slice(0,-1)+'ᅎ');
-                setLastWord('ᅎ');
             }
-            else if(lastWord === 'ᅎ'){
+            else if(targetWord === 'ᅎ'){
                 setOutput(output.slice(0,-1)+'ᅏ');
-                setLastWord('ᅏ');
             }
-            else if(lastWord === 'ㅍ'){
+            else if(targetWord === 'ㅍ'){
                 setOutput(output.slice(0,-1)+'ᅐ');
-                setLastWord('ᅐ');
             }
-            else if(lastWord === 'ᅐ'){
+            else if(targetWord === 'ᅐ'){
                 setOutput(output.slice(0,-1)+'ᅑ');
-                setLastWord('ᅑ');
             }
-            else if(lastWord === 'ㅠ'){
+            else if(targetWord === 'ㅠ'){
                 setOutput(output.slice(0,-1)+'ᅔ');
-                setLastWord('ᅔ');
             }
-            else if(lastWord === 'ㅜ'){
+            else if(targetWord === 'ㅜ'){
                 setOutput(output.slice(0,-1)+'ᅕ');
-                setLastWord('ᅕ');
             }else{
                 setOutput(output+'.')
-                setLastWord('.')
             }
             
         }
-        else if(event.key === 'ㅏ' && lastWord ==='ㅏ'){
+        else if(event.key === 'ㅏ' && targetWord ==='ㅏ'){
             setOutput(output.slice(0,-1)+'ㆍ')
-            setLastWord('ㆍ')
         }
         else if (event.shiftKey && event.key === 'ㅋ')
         {   
-            if (lastWord === 'ᄼ'){
+            if (targetWord === 'ᄼ'){
                 setOutput(output.slice(0,-1)+'ᄽ');
-                setLastWord('ᄽ');
             }else{
                 setOutput(output+'ᄼ')
-                setLastWord('ᄼ')
             }
         }
         else if (event.shiftKey && event.key === 'ㅌ')
         {   
-            if (lastWord === 'ᄾ'){
+            if (targetWord === 'ᄾ'){
                 setOutput(output.slice(0,-1)+'ᄿ');
-                setLastWord('ᄿ');
             }else{
                 setOutput(output+'ᄾ')
-                setLastWord('ᄾ')
             }
         }
         else if (event.shiftKey && event.key === 'ㅊ')
         {   
-            if (lastWord === 'ᅎ'){
+            if (targetWord === 'ᅎ'){
                 setOutput(output.slice(0,-1)+'ᅏ');
-                setLastWord('ᅏ');
             }else{
                 setOutput(output+'ᅎ')
-                setLastWord('ᅎ')
             }
         }
         else if (event.shiftKey && event.key === 'ㅍ')
         {   
-            if (lastWord === 'ᅐ'){
+            if (targetWord === 'ᅐ'){
                 setOutput(output.slice(0,-1)+'ᅑ');
-                setLastWord('ᅑ');
             }else{
                 setOutput(output+'ᅐ')
-                setLastWord('ᅐ')
             }
         }
         else if (event.shiftKey && event.key === 'ㅁ') {
             setOutput(output+'ㅿ');
-            setLastWord('ㅿ')
         }
         else if (event.shiftKey && event.key === 'ㅇ') {
             setOutput(output+'ㆁ');
-            setLastWord('ㆁ')
         }
         else if (event.shiftKey && event.key === 'ㅎ') {
             setOutput(output+'ㆆ');
-            setLastWord('ㆆ')
         }
         else if (event.shiftKey && event.key === 'ㅋ') {
             setOutput(output+'ᄼ');
-            setLastWord('ᄼ')
         }
         else if (event.shiftKey && event.key === 'ㅌ') {
             setOutput(output+'ᄾ');
-            setLastWord('ᄾ')
         }
         else if (event.shiftKey && event.key === 'ㅊ') {
             setOutput(output+'ᅎ');
-            setLastWord('ᅎ')
         }
         else if (event.shiftKey && event.key === 'ㅍ') {
             setOutput(output+'ᅐ');
-            setLastWord('ᅐ')
         }
         else if (event.shiftKey && event.key === 'ㅠ') {
             setOutput(output+'ᅔ');
-            setLastWord('ᅔ')
         }
         else if (event.shiftKey && event.key === 'ㅜ') {
             setOutput(output+'ᅕ');
-            setLastWord('ᅕ')
         }
         else if(preventWord.includes(event.key)){
             event.preventDefault();
         }
         else if(event.key==='Backspace'){
             setOutput(output.slice(0,-1))
-            setLastWord(output[-2])
         }
         else if(event.key ==='Space'){
             setOutput(output+' ')
-            setLastWord('')
         }
         else if(event.key ==='Enter'){
             setOutput(output + '\n');
-            setLastWord('')
         }
         else{
             setOutput(output+event.key);
-            setLastWord(event.key)
         }
       }
-    const formattedInput = output.split('\n').map((line, index) => (
-      <span key={index}>
-        {line}
-        <br />
-      </span>
-    ));
     return (
-        <div onKeyUp={handleKeyUp}>
-            <input type="text" value={output}/>
-            <p>{formattedInput}</p>
+        <div onKeyUp={handleKeyDown}>
+            <textarea value={output}></textarea>
         </div>
     );
 }
