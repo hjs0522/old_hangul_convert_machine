@@ -1,5 +1,6 @@
-import React, { useState,useRef } from 'react';
+import React, { useState,useRef, useEffect } from 'react';
 import * as Hangul from 'hangul-js';
+import { assemble } from 'hangul-js';
 /*
 완성형 옛한글 만드는 방법 시도
 1. 초성,중성,종성을 받아 그에 대응되는 유니코드 값을 이용하여 완성형 글자의 유니코드를 만든다
@@ -21,17 +22,41 @@ const HangulConverter: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preventWord = ['Shift','CapsLock','Tab','Control','Alt','Meta','Escape','F1','F2','F3','F4',
   'F5','F6','F7','F8','F9','F10','F11','F12']
+  const vowel = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㆍ',]
   const Arrow = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
   const convertHangul: Record<string, string> = {
-      'ㅁ': String.fromCharCode(0X1140),
+      'ㅁ': 'ᅀ',
       'ㅇ': 'ㆁ',
       'ㅎ': 'ㆆ',
       'ㅏ': 'ㆍ',
       'ㅂ': 'ㅸ',
       'ㄹ': 'ㆅ',
-      'n': 'ᅀㅏㄱ',
   }
+  const cho: Record<string,string> = {
+    'ᅀ':encodeURI(String.fromCharCode(0x1140)),
+    'ㆁ':encodeURI(String.fromCharCode(0x114C)),
+    'ㆆ':encodeURI(String.fromCharCode(0x1159)),
+  }
+  const jung: Record<string,string> = {
+    'ㅏ':encodeURI(String.fromCharCode(0x1161)),
+    'ㅐ':encodeURI(String.fromCharCode(0x1162)),
+    'ㅑ':encodeURI(String.fromCharCode(0x1163)),
+    'ㅒ':encodeURI(String.fromCharCode(0x1164)),
+    'ㅓ':encodeURI(String.fromCharCode(0x1165)),
+    'ㅔ':encodeURI(String.fromCharCode(0x1166)),
+    'ㅕ':encodeURI(String.fromCharCode(0x1167)),
+    'ㅖ':encodeURI(String.fromCharCode(0x1168)),
+    'ㅗ':encodeURI(String.fromCharCode(0x1169)),
+    'ㅛ':encodeURI(String.fromCharCode(0x116D)),
+    'ㅜ':encodeURI(String.fromCharCode(0x116E)),
+    'ㅠ':encodeURI(String.fromCharCode(0x1172)),
+    'ㅡ':encodeURI(String.fromCharCode(0x1173)),
+    'ㅣ':encodeURI(String.fromCharCode(0x1175)),
+    'ㆍ':encodeURI(String.fromCharCode(0x119E)),
+  }
+
   const handleKeyUp = (e:React.KeyboardEvent) => {
+    console.log('key event')
       if (e.key === '.'){
           const newWord = convertHangul[lastWord];
           if (newWord){
@@ -40,29 +65,41 @@ const HangulConverter: React.FC = () => {
               setLastWord(newWord);
           }else{
               setOutput(output.slice(0,cursorPosition-1)+'.'+output.slice(cursorPosition))
-              setLastWord('.')
+              setLastWord('.');
           }
       }
       else if(Arrow.includes(e.key)){
           setCursorPosition(textareaRef.current?.selectionStart||0);
           setLastWord('');
       }
+      else if(vowel.includes(e.key)){
+        const firstWord = cho[lastWord]
+        const secondWord = jung[e.key]
+        if(firstWord && secondWord){
+          setOutput(output.slice(0,cursorPosition-2)+decodeURI(firstWord+secondWord)+output.slice(cursorPosition))
+        }
+        setLastWord(e.key)
+      }
       else if(preventWord.includes(e.key)){
           if (e.key !== 'Shift'){
-              setLastWord('');
+            setLastWord('');
           }
           e.preventDefault();
       }
       else{
-          setLastWord(e.key)
-      }
-      
+        setLastWord(e.key)
+      }    
   }
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  
-    setCursorPosition(textareaRef.current?.selectionStart ||0)
-    setOutput(result.join(''));
-  };
+      console.log('input change event')
+      const value =Hangul.disassemble(e.target.value);
+      console.log(value)
+      setCursorPosition(textareaRef.current?.selectionStart ||0)
+      setOutput(assemble(value));
+    };
+  useEffect(()=>{
+    console.log(output)
+  },[output])
   return (
       <div className={'container'} onKeyUp = {handleKeyUp}>
           <textarea className={'text'} ref={textareaRef} onChange={handleInputChange} value={output}></textarea>
@@ -99,6 +136,6 @@ const HangulConverter: React.FC = () => {
           </div>
       </div>
   );
-
+}
 
 export default HangulConverter;
