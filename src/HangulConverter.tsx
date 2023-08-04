@@ -13,7 +13,20 @@ console.log(Hangul.assemble(['ㆆ','ㅏ','ㄱ'])) 실행시 'ㆆㅏㄱ'이 나�
 3. 
 */
 type Table = Record<string,string>;
+//초성인지 판단
+function isOnset(c:number) {
+  return (0x1100 <= c && c <= 0x115E) || (0xA960 <= c && c <= 0xA97F);
+}
+//중성인지 판단
+function isVowel(c:number) {
+  return (0x1160 <= c && c <= 0x11A7) || (0xD7B0 <= c && c <= 0xD7C6);
+}
+//종성인지 판단
+function isCoda(c:number) {
+  return (0x11A8 <= c && c <= 0x11FF) || (0xD7CB <= c && c <= 0xD7FF);
+}
 
+//대응되는 값을 찾아주는 함수
 function mapping(str:string, table:Table) {
   for(let l = 2; l >= 0; l--) {
     for(let k in table) {
@@ -24,6 +37,101 @@ function mapping(str:string, table:Table) {
   return str;
 }
 
+//초성 중성 종성으로 분리해주는 함수
+function splitComposition(str:string) {
+  const chos = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  const jungs = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅗㅏ', 'ㅗㅐ', 'ㅗㅣ', 'ㅛ', 'ㅜ', 'ㅜㅓ', 'ㅜㅔ', 'ㅜㅣ', 'ㅠ', 'ㅡ', 'ㅡㅣ', 'ㅣ'];
+  const jongs = ['', 'ㄱ', 'ㄲ', 'ㄱㅅ', 'ㄴ', 'ㄴㅈ', 'ㄴㅎ', 'ㄷ', 'ㄹ', 'ㄹㄱ', 'ㄹㅁ', 'ㄹㅂ', 'ㄹㅅ', 'ㄹㅌ', 'ㄹㅍ', 'ㄹㅎ', 'ㅁ', 'ㅂ', 'ㅂㅅ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  function complexSyllable(code:number) {
+    switch(code)
+    {
+      case 0x3133: return 'ㄱㅅ';
+      case 0x3135: return 'ㄴㅈ';
+      case 0x3136: return 'ㄴㅎ';
+      case 0x313A: return 'ㄹㄱ';
+      case 0x313B: return 'ㄹㅁ';
+      case 0x313C: return 'ㄹㅂ';
+      case 0x313D: return 'ㄹㅅ';
+      case 0x313E: return 'ㄹㅌ';
+      case 0x313F: return 'ㄹㅍ';
+      case 0x3140: return 'ㄹㅎ';
+      case 0x3144: return 'ㅂㅅ';
+    }
+    return null;
+  }
+
+  let ret = '';
+  for(let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if(0xAC00 <= code && code < 0xD7A4) {
+      let s = (code - 0xAC00);
+      const c = s % 28;
+      s = Math.floor(s / 28);
+      const v = s % 21;
+      s = Math.floor(s / 21);
+      ret += chos[s];
+      ret += jungs[v];
+      if(c) ret += jongs[c];
+    } else if(0x1100 <= code && code <= 0x1112) {
+      ret += chos[code - 0x1100];
+    } else if(0x1161 <= code && code <= 0x1175) {
+      ret += jungs[code - 0x1161];
+    } else if(0x11A8 <= code && code <= 0x11C2) {
+      ret += jongs[code - 0x11A7];
+    } else {
+      const c = complexSyllable(code);
+      if (c) ret += c;
+      else ret += str.slice(i, 1);
+    }
+  }
+  return ret;
+}
+//초성 중성 종성을 결합해주는 함수
+function joinSyllable(str:string) {
+  let ret = '';
+  let stage = 0;
+  let joining = 0;
+  let temp = '';
+  for(let i = 0; i < str.length; i++) {
+    var code = str.charCodeAt(i);
+    if(stage === 0 && 0x1100 <= code && code < 0x1100 + 19) {
+      joining += (code - 0x1100) * 21 * 28;
+      stage = 1;
+      temp += str.slice(i, 1);
+    } else if(stage === 1 && 0x1161 <= code && code < 0x1161 + 21) {
+      joining += (code - 0x1161) * 28;
+      stage = 2;
+      temp += str.slice(i, 1);
+    } else if(stage === 2 && 0x11A8 <= code && code < 0x11A7 + 28) {
+      joining += code - 0x11A7;
+      ret += String.fromCharCode(joining + 0xAC00);
+      joining = 0;
+      stage = 0;
+      temp = '';
+    } else {
+      if(stage === 2 && !isCoda(code)) {
+        ret += String.fromCharCode(joining + 0xAC00);
+      } else {
+        ret += temp;
+      }
+      temp = '';
+      joining = 0;
+      stage = 0x1100 <= code && code < 0x1100 + 19 ? 1 : 0;
+      if(stage) {
+        temp = str.slice(i, 1);
+        joining += (code - 0x1100) * 21 * 28;
+      } else {
+        ret += str.slice(i, 1);
+      }
+    }
+  }
+  if(stage == 2) {
+    ret += String.fromCharCode(joining + 0xAC00);
+  } else {
+    ret += temp + str.slice(i, 1);
+  }
+  return ret;
+}
 
 const HangulConverter: React.FC = () => {
   /*
